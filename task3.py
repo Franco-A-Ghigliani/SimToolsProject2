@@ -49,5 +49,5 @@ print("Updated Initial Values in Mechanism:", y[:7])
 
 # Test residuals to verify correctness
 t = 0.0
-residuals = mechanism.res(t, y, yp)
+residuals = mechanism.f(t, y, yp)
 print("Residuals at t=0:", residuals[:7])  # Should be close to zero if valid

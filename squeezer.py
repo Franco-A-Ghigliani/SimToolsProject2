@@ -38,15 +38,6 @@ class Seven_bar_mechanism(ap.Implicit_Problem):
             0., 0., 0., 0., 0.]), zeros((6,))))
         return y, yp
 
-    def res(self, t, y, yp):
-        """
-        Residual function of the 7-bar mechanism in
-        Hairer, Vol. II, p. 533 ff, see also formula (7.11)
-        written in residual form.
-        """
-        # Call the original f function for residual computation
-        return self.f(t, y, yp)
-
     def f(self, t, y, yp):
         """
         Residual function of the 7-bar mechanism.
@@ -150,4 +141,4 @@ class Seven_bar_mechanism(ap.Implicit_Problem):
 test_squeezer = Seven_bar_mechanism()
 y, y_prime = test_squeezer.init_squeezer()
 t = 0.
-test_squeezer.res(t, y, y_prime)
+test_squeezer.f(t, y, y_prime)

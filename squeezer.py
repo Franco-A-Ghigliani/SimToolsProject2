@@ -102,6 +102,42 @@ class Seven_bar_mechanism(ap.Implicit_Problem):
 
         ff = array([mom, 0, fx * (sc * coga - sd * siga) + fy * (sd * coga + sc * siga), 0, 0, 0, 0])
 
+        #  constraint matrix  G
+
+        gp = zeros((6, 7))
+
+        gp[0, 0] = - rr * sibe + d * sibeth
+        gp[0, 1] = d * sibeth
+        gp[0, 2] = - ss * coga
+        gp[1, 0] = rr * cobe - d * cobeth
+        gp[1, 1] = - d * cobeth
+        gp[1, 2] = - ss * siga
+        gp[2, 0] = - rr * sibe + d * sibeth
+        gp[2, 1] = d * sibeth
+        gp[2, 3] = - e * cophde
+        gp[2, 4] = - e * cophde + zt * side
+        gp[3, 0] = rr * cobe - d * cobeth
+        gp[3, 1] = - d * cobeth
+        gp[3, 3] = - e * siphde
+        gp[3, 4] = - e * siphde - zt * code
+        gp[4, 0] = - rr * sibe + d * sibeth
+        gp[4, 1] = d * sibeth
+        gp[4, 5] = zf * siomep
+        gp[4, 6] = zf * siomep - u * coep
+        gp[5, 0] = rr * cobe - d * cobeth
+        gp[5, 1] = - d * cobeth
+        gp[5, 5] = - zf * coomep
+        gp[5, 6] = - zf * coomep - u * siep
+
+        #     Index-3 constraint
+        g = zeros((6,))
+        g[0] = rr * cobe - d * cobeth - ss * siga - xb
+        g[1] = rr * sibe - d * sibeth + ss * coga - yb
+        g[2] = rr * cobe - d * cobeth - e * siphde - zt * code - xa
+        g[3] = rr * sibe - d * sibeth + e * cophde - zt * side - ya
+        g[4] = rr * cobe - d * cobeth - zf * coomep - u * siep - xa
+        g[5] = rr * sibe - d * sibeth - zf * siomep + u * coep - ya
+
         # Residual construction
         res_1 = yp[:7] - y[7:14]
         res_2 = dot(m, yp[7:14]) - ff[:7]

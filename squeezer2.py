@@ -2,7 +2,7 @@ import numpy as np
 from assimulo.problem import Implicit_Problem
 
 
-class Squeezer2(Implicit_Problem):
+class Seven_bar_mechanism_2(Implicit_Problem):
     def __init__(self):
         super().__init__()
         self.t0 = 0.0  # Initial time

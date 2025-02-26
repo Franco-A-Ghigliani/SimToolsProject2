@@ -1,53 +1,42 @@
-import numpy as np
-from scipy.optimize import root
-from squeezer import Seven_bar_mechanism  # Assuming your class is in this file
 
+from __future__ import division
 
-def constraint_equations(x):
-    """
-    Defines the system g(q) = 0 that needs to be solved.
-    x = [β, γ, Φ, δ, Ω, ε] are the unknowns.
-    """
-    beta, gamma, phi, delta, omega, epsilon = x
+from numpy import zeros, sin, cos, array
+from scipy.linalg import norm
+from scipy.optimize import fsolve
 
-    # Define the equations from Reference [2], Eq. (7.7)
-    g1 = beta + 0.0617138900142764496358948458001
-    g2 = gamma - 0.455279819163070380255912382449
-    g3 = phi - 0.222668390165885884674473185609
-    g4 = delta - 0.487364979543842550225598953530
-    g5 = omega + 0.222668390165885884674473185609
-    g6 = epsilon - 1.23054744454982119249735015568
+# Geometry
+xa, ya = -.06934, -.00227
+xb, yb = -0.03635, .03273
+d, e = 28.e-3, 2.e-2
+rr = 7.e-3
+ss = 35.e-3
+u = 4.e-2
+zf, zt = 2.e-2, 4.e-2
 
-    return np.array([g1, g2, g3, g4, g5, g6])
+def g(q):
+	Beta, gamma, Phi, delta, Omega, epsilon = q[0:6]
 
+	gvec = zeros((6,))
 
-def compute_consistent_initial_values():
-    """
-    Uses Newton’s method to solve g(q) = 0 for consistent initial values.
-    """
-    initial_guess = np.array([-0.06, 0.45, 0.22, 0.48, -0.22, 1.23])  # Close to expected values
+	gvec[0] = rr*cos(Beta) - d*cos(Beta) - ss*sin(gamma) - xb
+	gvec[1] = rr*sin(Beta) - d*sin(Beta) + ss*cos(gamma) - yb
+	gvec[2] = rr*cos(Beta) - d*cos(Beta) - e*sin(Phi+delta) - zt*cos(delta) - xa
+	gvec[3] = rr*sin(Beta) - d*sin(Beta) + e*cos(Phi+delta) - zt*sin(delta) - ya
+	gvec[4] = rr*cos(Beta) - d*cos(Beta) - zf*cos(Omega+epsilon) - u*sin(epsilon) - xa
+	gvec[5] = rr*sin(Beta) - d*sin(Beta) - zf*sin(Omega+epsilon) + u*cos(epsilon) - ya
 
-    solution = root(constraint_equations, initial_guess, method='hybr')
+	return gvec
 
-    if solution.success:
-        return solution.x
-    else:
-        raise ValueError("Newton's method failed to converge: " + solution.message)
+y_1 = array([-0.0617138900142764496358948458001,  #  Beta
+				0.455279819163070380255912382449,   # gamma
+				0.222668390165885884674473185609,   # Phi
+				0.487364979543842550225598953530,   # delta
+				-0.222668390165885884674473185609,  # Omega
+				1.23054744454982119249735015568])   # epsilon
 
+# calculate initial conditions using fsolve
+g0 = fsolve(g, x0=zeros((6,)))
 
-# Solve for consistent initial values
-consistent_values = compute_consistent_initial_values()
-print("Computed Initial Values:", consistent_values)
-
-# Initialize the Seven_bar_mechanism with these values
-mechanism = Seven_bar_mechanism()
-y, yp = mechanism.init_squeezer()
-
-# Replace initial values with the computed ones
-y[:7] = np.hstack((consistent_values[0], 0.0, consistent_values[1:]))  # Theta(0) = 0
-print("Updated Initial Values in Mechanism:", y[:7])
-
-# Test residuals to verify correctness
-t = 0.0
-residuals = mechanism.res(t, y, yp)
-print("Residuals at t=0:", residuals[:7])  # Should be close to zero if valid
+print(g0 - y_1)
+print(norm(g0 - y_1))

@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
-from assimulo.problem import Explicit_Problem
-from assimulo.solvers import RungeKutta4, ExplicitEuler, ImplicitEuler
+
 import matplotlib.pyplot as mpl
-from scipy.linalg import solve
+from assimulo.problem import Explicit_Problem
+from assimulo.solvers import CVode  # Use CVode instead of RungeKutta4
 from numpy import array, zeros, block, hstack, sin, cos, sqrt
+from scipy.linalg import solve
 
 # Inertia data
 m1, m2, m3, m4, m5, m6, m7 = .04325, .00365, .02373, .00706, .07050, .00706, .05498
@@ -141,9 +142,9 @@ y0 = init_squeezer()
 tf = 0.03
 
 model = Explicit_Problem(rhs, y0, 0)
-rk = RungeKutta4(model)
-rk.h = 1e-5  # smaller than 1e-3!
-t, y = rk.simulate(tf)
+sim = CVode(model)  # Use CVode instead of RungeKutta4
+sim.inith = 1e-5  # Set initial step size
+t, y = sim.simulate(tf)  # Simulate until final time tf
 
 angles = [states[0:7] for states in y]
 

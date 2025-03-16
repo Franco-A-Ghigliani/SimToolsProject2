@@ -68,49 +68,61 @@ def run_seven_bar_problem(with_plots=True, problem_index=3, atol_v=1E5, atol_lam
     return mod, sim, [t, y]
 
 
-def plot_soln(t, y, savefig=False, plotnumber=500):
+def plot_soln(t, y, plotnumber=500):
     # do some plotting
     mpl.figure(plotnumber, clear=False)
     for i in range(7):
         mpl.plot(t, y[:, i])
     mpl.legend(var_labels[:7])
-    if savefig:
-        mpl.savefig(f'../Plots/Project2_main/Figure_{plotnumber}.pdf')
+    mpl.title('Time Evolution of Angles')
+    mpl.xlabel('Time (s)')
+    mpl.ylabel('Angles (rad)')
+    mpl.savefig(f'report/plots/angles.pdf')
+    
     mpl.figure(plotnumber + 1, clear=False)
     for i in range(7, 14):
         mpl.plot(t, y[:, i])
     mpl.legend(var_labels[7:14])
-    if savefig:
-        mpl.savefig(f'../Plots/Project2_main/Figure_{plotnumber + 1}.pdf')
+    mpl.title('Time Evolution of Angular Velocities')
+    mpl.xlabel('Time (s)')
+    mpl.ylabel('Angular Velocities (rad/s)')
+    mpl.savefig(f'report/plots/velocities.pdf')
+    
     if y.shape[1] > 14:
         mpl.figure(plotnumber + 2, clear=False)
         for i in range(14, 20):
             mpl.plot(t, y[:, i])
         mpl.legend(var_labels[14:])
-        if savefig:
-            mpl.savefig(f'../Plots/Project2_main/Figure_{plotnumber + 2}.pdf')
+        mpl.title('Time Evolution of Lagrange Multipliers')
+        mpl.xlabel('Time (s)')
+        mpl.ylabel('Lagrange Multipliers (N⋅m)')
+        mpl.savefig(f'report/plots/lagrange_multipliers.pdf')
 
 
-def plot_stats(xdata, ydata, plotnumber=500, savefig=False, xlabel='', figsize=(6.4,4.8)):
+def plot_stats(xdata, ydata, plotnumber=500, xlabel='', figsize=(6.4,4.8)):
     ylabels = ['nsteps', 'nfcns', 'njacs', 'nerrfails']
+    titles = ['Number of Integration Steps', 'Number of Function Evaluations', 
+              'Number of Jacobian Evaluations', 'Number of Error Test Failures']
     for i in range(4):
         mpl.figure(plotnumber + i, figsize, clear=False)
-        # fig, ax = mpl.subplots(plotnumber + i, clear=False)
         mpl.bar(xdata, ydata[i])
         mpl.xlabel(xlabel)
         mpl.ylabel(ylabels[i])
+        mpl.title(titles[i])
         mpl.tight_layout()
-        if savefig:
-            mpl.savefig(f'../Plots/Project2_main/Figure_{plotnumber + i}.pdf')
+        mpl.savefig(f'report/plots/stats_{i}.pdf')
+    
     ylabels = ['nfcns / nsteps', 'njacs / nsteps', 'nerrfails / nsteps']
+    titles = ['Function Evaluations per Step', 'Jacobian Evaluations per Step', 
+              'Error Test Failures per Step']
     for i in range(3):
         mpl.figure(plotnumber + 10 + i, figsize, clear=False)
         mpl.bar(xdata, np.asarray(ydata[i + 1]) / np.asarray(ydata[0]))
         mpl.xlabel(xlabel)
         mpl.ylabel(ylabels[i])
+        mpl.title(titles[i])
         mpl.tight_layout()
-        if savefig:
-            mpl.savefig(f'../Plots/Project2_main/Figure_{plotnumber + 10 + i}.pdf')
+        mpl.savefig(f'report/plots/stats_{i + 10}.pdf')
 
 
 if __name__ == '__main__':
@@ -133,9 +145,9 @@ if __name__ == '__main__':
                 all_solns_interp[i, :, j] = np.interp(t, soln[0], soln[1][:, j])
 
         # Plot soln
-        plot_soln(all_solns[1][0], all_solns[1][1], savefig=True, plotnumber=510)
-        plot_soln(all_solns[2][0], all_solns[2][1], savefig=True, plotnumber=513)
-        plot_soln(all_solns[3][0], all_solns[3][1], savefig=True, plotnumber=516)
+        plot_soln(all_solns[1][0], all_solns[1][1], plotnumber=510)
+        plot_soln(all_solns[2][0], all_solns[2][1], plotnumber=513)
+        plot_soln(all_solns[3][0], all_solns[3][1], plotnumber=516)
         plot_soln(t, all_solns_interp[3, :, :] - all_solns_interp[0, :, :], savefig=True, plotnumber=520)
         plot_soln(t, all_solns_interp[3, :, :] - all_solns_interp[1, :, :], savefig=True, plotnumber=530)
         plot_soln(t, all_solns_interp[3, :, :] - all_solns_interp[2, :, :], savefig=True, plotnumber=540)

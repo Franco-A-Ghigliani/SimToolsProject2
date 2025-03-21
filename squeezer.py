@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
 import assimulo.problem as ap
-from numpy import array, zeros, dot, hstack, sin, cos, sqrt
+from numpy import array, zeros, dot, hstack, sin, cos, sqrt, zeros_like
 from scipy.optimize import fsolve
 
 
@@ -229,3 +229,26 @@ class Seven_bar_mechanism_expl(ap.Explicit_Problem):
 
     def rhs(self, t, y):
         return res_general(t, y, y[7:], 0)
+
+
+def compute_consistent_initial():
+    """
+    Computes consistent initial values for the seven-bar mechanism.
+
+    Returns:
+        np.array: The consistent initial state y0.
+    """
+    problem = Seven_bar_mechanism_indx3()  # Use index-3 problem for full constraints
+    y0, yp0 = problem.init_squeezer()  # Get initial guess
+
+    def residuals(y_init):
+        """
+        Residual function to ensure constraints are met.
+        Only solving for y0, assuming velocities and multipliers will follow.
+        """
+        yp_init = zeros_like(y0)  # Assume zero initial derivatives for solving y0
+        return problem.res(0.0, y_init, yp_init)
+
+    y0_consistent = fsolve(residuals, y0)  # Solve only for y0
+
+    return y0_consistent

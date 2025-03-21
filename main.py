@@ -1,9 +1,12 @@
+import os
+
 import matplotlib.pyplot as mpl
 import numpy as np
+from tabulate import tabulate
 from assimulo.solvers import IDA, RungeKutta4
 
 from squeezer import Seven_bar_mechanism_indx3, Seven_bar_mechanism_indx2, Seven_bar_mechanism_indx1, \
-    Seven_bar_mechanism_expl
+    Seven_bar_mechanism_expl, compute_consistent_initial
 
 angles = [r'$\beta$', r'$\Theta$', r'$\gamma$', r'$\phi$', r'$\delta$', r'$\Omega$', r'$\epsilon$']
 velocities = [r'$\dot{\beta}$', r'$\dot{\Theta}$', r'$\dot{\phi}$', r'$\dot{\delta}$',
@@ -15,6 +18,9 @@ lambdas = [r'$\lambda_1$', r'$\lambda_2$', r'$\lambda_3$', r'$\lambda_4$', r'$\l
 var_labels = angles + velocities + lambdas
 
 tab_headers = ['experiment', 'index', 'atol_v', 'atol_lambda', 'algvar_v', 'algvar_lambda', 'suppress_alg']
+
+output_dir = './Plots/Tables/'
+os.makedirs(output_dir, exist_ok=True)
 
 
 def run_seven_bar_problem(with_plots=True, problem_index=3, atol_v=1E5, atol_lambda=1E5,
@@ -128,7 +134,7 @@ def plot_stats(xdata, ydata, plotnumber=500, xlabel='', figsize=(6.4,4.8)):
 if __name__ == '__main__':
     run_seven_bar_problem(True, 1, 1E5, 1E5, False, False, True)
 
-    if False:
+    if True:
         # This plots comparisons of the index 1,2,3 formulations
         all_solns = []
         for i in range(4):
@@ -148,12 +154,12 @@ if __name__ == '__main__':
         plot_soln(all_solns[1][0], all_solns[1][1], plotnumber=510)
         plot_soln(all_solns[2][0], all_solns[2][1], plotnumber=513)
         plot_soln(all_solns[3][0], all_solns[3][1], plotnumber=516)
-        plot_soln(t, all_solns_interp[3, :, :] - all_solns_interp[0, :, :], savefig=True, plotnumber=520)
-        plot_soln(t, all_solns_interp[3, :, :] - all_solns_interp[1, :, :], savefig=True, plotnumber=530)
-        plot_soln(t, all_solns_interp[3, :, :] - all_solns_interp[2, :, :], savefig=True, plotnumber=540)
+        plot_soln(t, all_solns_interp[3, :, :] - all_solns_interp[0, :, :], plotnumber=520)
+        plot_soln(t, all_solns_interp[3, :, :] - all_solns_interp[1, :, :], plotnumber=530)
+        plot_soln(t, all_solns_interp[3, :, :] - all_solns_interp[2, :, :], plotnumber=540)
         # mpl.show()
 
-    if False:
+    if True:
         # This compares the index=1,2,3 formulations
         # list of experiments in the form [problem_index, atol_v, atol_lambda, algvar_v, algvar_lambda, suppress_alg]
         experiments = [[1, 1E5, 1E5, False, False, True],
@@ -178,9 +184,9 @@ if __name__ == '__main__':
             except:
                 print(f'There seems to be a problem in the experiment {exp}')
 
-        plot_stats(xdata, [nsteps, nfcns, njacs, nerrfails], plotnumber=600, savefig=True, xlabel='index', figsize=(2,2))
+        plot_stats(xdata, [nsteps, nfcns, njacs, nerrfails], plotnumber=600, xlabel='index', figsize=(2, 2))
 
-    if False:
+    if True:
         # This tests the index=1 problem
         # list of experiments in the form [problem_index, atol_v, atol_lambda, algvar_v, algvar_lambda, suppress_alg]
         experiments = [[1, 1E5, 1E5, False, False, True],
@@ -191,8 +197,9 @@ if __name__ == '__main__':
 
 
         # print(tabulate(experiments, headers=tab_headers, showindex='always', tablefmt='fancy_grid'))
-        with open('../Plots/Tables/Overview_Index1Experiment.tex', 'w') as output:
+        with open('./Plots/Tables/Overview_Index1Experiment.tex', 'w') as output:
             output.write(tabulate(experiments, headers=tab_headers, showindex='always', tablefmt='latex'))
+            output.close()
 
         nsteps = []
         nfcns = []
@@ -212,9 +219,9 @@ if __name__ == '__main__':
             except:
                 print(f'There seems to be a problem in the experiment {exp}')
 
-        plot_stats(xdata, [nsteps, nfcns, njacs, nerrfails], plotnumber=700, savefig=True, xlabel='experiment', figsize=(2,2))
+        plot_stats(xdata, [nsteps, nfcns, njacs, nerrfails], plotnumber=700, xlabel='experiment', figsize=(2, 2))
 
-    if False:
+    if True:
         # This tests the index=2 problem
         # list of experiments in the form [problem_index, atol_v, atol_lambda, algvar_v, algvar_lambda, suppress_alg]
         experiments = [[2, 1E-6, 1E5, False, False, True],
@@ -239,10 +246,10 @@ if __name__ == '__main__':
             except:
                 print(f'There seems to be a problem in the experiment {exp}')
 
-        plot_stats(xdata, [nsteps, nfcns, njacs, nerrfails], plotnumber=800, savefig=True, figsize=(2,2))
+        plot_stats(xdata, [nsteps, nfcns, njacs, nerrfails], plotnumber=800, figsize=(2, 2))
     # mpl.show()
 
-    if False:
+    if True:
         # This exports the experiment configuration as a latex table
         # tab_headers = ['experiment', r'\pyth{problem_index}', r'\pyth{atol_v}', r'\pyth{atol_lambda}', r'\pyth{algvar_v}',
         #                r'\pyth{algvar_lambda}', r'\pyth{suppress_alg}']
@@ -256,10 +263,11 @@ if __name__ == '__main__':
         #    for j, obj in enumerate(line):
         #        experiments[i][j] = f'\pyth{{{obj}}}'
         print(tabulate(experiments, headers=tab_headers, showindex='always', tablefmt='fancy_grid'))
-        with open('../Plots/Tables/Overview_Index1Experiment.tex', 'w') as output:
+        with open('./Plots/Tables/Overview_Index1Experiment.tex', 'w') as output:
             output.write(tabulate(experiments, headers=tab_headers, showindex='always', tablefmt='latex'))
+            output.close()
 
-    if False:
+    if True:
         # This tests the RK4 method for different values of h
         exp = [0, 1E-6, 1E-6, False, False, False]
 
@@ -279,7 +287,7 @@ if __name__ == '__main__':
         mpl.ylabel('L2')
         mpl.show()
 
-    if False:
+    if True:
         # This tests the RK4 method
         exp = [0, 1E-6, 1E-6, False, False, False]
 
@@ -289,17 +297,21 @@ if __name__ == '__main__':
             print(f'There seems to be a problem in the experiment {exp}')
 
 
-    if False:
+    if True:
         # This exports the generated initial values as a latex table
 
-        y = calculate_consistent_initial()
+        # Compute consistent initial values
+        y = compute_consistent_initial()
 
         print(tabulate(list(zip(angles, y[:7])), headers='firstrow', tablefmt='fancy_grid'))
         print(tabulate(list(zip(accelerations, y[7:14])), headers='firstrow', tablefmt='fancy_grid'))
         print(tabulate(list(zip(lambdas, y[14:])), headers='firstrow', tablefmt='fancy_grid'))
-        with open('../Plots/Tables/Initial_Angles.tex', 'w') as output:
+        with open('./Plots/Tables/Initial_Angles.tex', 'w') as output:
             output.write(tabulate(list(zip(angles, y[:7])), tablefmt='latex_raw'))
-        with open('../Plots/Tables/Initial_Accelerations.tex', 'w') as output:
+            output.close()
+        with open('./Plots/Tables/Initial_Accelerations.tex', 'w') as output:
             output.write(tabulate(list(zip(accelerations, y[7:14])), tablefmt='latex_raw'))
-        with open('../Plots/Tables/Initial_Lambdas.tex', 'w') as output:
+            output.close()
+        with open('./Plots/Tables/Initial_Lambdas.tex', 'w') as output:
             output.write(tabulate(list(zip(lambdas, y[14:])), tablefmt='latex_raw'))
+            output.close()
